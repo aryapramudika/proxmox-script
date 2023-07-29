@@ -17,7 +17,7 @@ Download Cloud-Image-File
 Run The Command:
 
 ```
-create-template vmid name cpu ram net disk image-file
+create-template vmid name cpu memory net disk image-file
 ```
 
 For using cloud-init in Proxmox, you can read here:
