@@ -1,0 +1,40 @@
+#!/bin/bash
+
+vmid=$1
+name=$2
+cpu=$3
+memory=$4
+image=$5
+
+Help()
+{
+   # Display Help
+   echo "Proxmox Create Template Cloud-Image & Cloud-Init"
+   echo
+   echo "Syntax: create-template [vmid|name|cpu|memory|image-file]"
+   echo "options:"
+   echo "vmid       | vmid for template example (9001)"
+   echo "name       | name of template."
+   echo "cpu        | total cores of template"
+   echo "memory     | total memory of template(in MB)"
+   echo "image-file | cloud-image-file"
+   echo ""
+   echo "Full example command: "
+   echo "create-template 1001 template-ubuntu-20 2 4096 focal-ubuntu.img"
+   echo
+}
+while getopts ":h" option; do
+   case $option in
+      h) # display Help
+         Help
+         exit;;
+   esac
+done
+
+qm create $vmid --cores $cpu --memory $memory --name $name --net0 virtio,bridge=vmbr1
+qm importdisk $vmid $image local
+qm set $vmid --scsihw virtio-scsi-pci --scsi0 local:$vmid/vm-$vmid-disk-0.raw
+qm set $vmid --ide2 local:cloudinit
+qm set $vmid --boot c --bootdisk scsi0
+qm set $vmid --serial0 socket --vga serial0
+qm template $vmid
