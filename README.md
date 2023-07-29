@@ -22,4 +22,4 @@ create-template vmid name cpu ram net disk image-file
 
 For using cloud-init in Proxmox, you can read here:
 
-* [https://pve.proxmox.com/wiki/Cloud-Init_Support]https://pve.proxmox.com/wiki/Cloud-Init_Support
+* [https://pve.proxmox.com/wiki/Cloud-Init_Support](https://pve.proxmox.com/wiki/Cloud-Init_Support)
