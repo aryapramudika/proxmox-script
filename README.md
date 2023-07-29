@@ -5,6 +5,8 @@ Available now: Create VM Template from Cloud-Image and Cloud-Init
 
 ## How to use ?
 
+Run on Proxmox Console/SSH Server
+
 Clone this repo and copy file to your PATH (**/usr/local/bin** or other path) and give execution permissions **chmod +x**
 
 Download Cloud-Image-File
