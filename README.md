@@ -1,6 +1,8 @@
 # Proxmox-Script
 Proxmox-Script
 
+Available now: Create VM Template from Cloud-Image and Cloud-Init
+
 ## How to use ?
 
 Clone this repo and copy file to your PATH (**/usr/local/bin** or other path) and give execution permissions **chmod +x**
@@ -15,7 +17,9 @@ Download Cloud-Image-File
 Run The Command:
 
 ```
-create-template vmid name cpu ram image-file
+create-template vmid name cpu ram net disk image-file
 ```
 
-Custom user and ssh key in cloud init 
+For using cloud-init in Proxmox, you can read here:
+
+* [https://pve.proxmox.com/wiki/Cloud-Init_Support]https://pve.proxmox.com/wiki/Cloud-Init_Support
