@@ -1,26 +1,31 @@
 #!/bin/bash
+## Created by Arya Pramudika
 
 vmid=$1
 name=$2
 cpu=$3
 memory=$4
-image=$5
+net=$5
+disk=$6
+image=$7
 
 Help()
 {
    # Display Help
    echo "Proxmox Create Template Cloud-Image & Cloud-Init"
    echo
-   echo "Syntax: create-template [vmid|name|cpu|memory|image-file]"
+   echo "Syntax: create-template [vmid|name|cpu|memory|net|disk|image-file]"
    echo "options:"
-   echo "vmid       | vmid for template example (9001)"
+   echo "vmid       | vmid for template example: (9001)"
    echo "name       | name of template."
    echo "cpu        | total cores of template"
    echo "memory     | total memory of template(in MB)"
+   echo "net        | network for template (vmbr0/vmbr1/etc)"
+   echo "disk       | disk location for template (local-lvm/other storage)"
    echo "image-file | cloud-image-file"
    echo ""
    echo "Full example command: "
-   echo "create-template 1001 template-ubuntu-20 2 4096 focal-ubuntu.img"
+   echo "create-template 1001 template-ubuntu-20 2 4096 vmbr0 local-lvm focal-ubuntu.img"
    echo
 }
 while getopts ":h" option; do
@@ -31,10 +36,19 @@ while getopts ":h" option; do
    esac
 done
 
-qm create $vmid --cores $cpu --memory $memory --name $name --net0 virtio,bridge=vmbr1
-qm importdisk $vmid $image local
-qm set $vmid --scsihw virtio-scsi-pci --scsi0 local:$vmid/vm-$vmid-disk-0.raw
-qm set $vmid --ide2 local:cloudinit
-qm set $vmid --boot c --bootdisk scsi0
-qm set $vmid --serial0 socket --vga serial0
-qm template $vmid
+echo "Creating $name template..."
+qm create $vmid --cores $cpu --memory $memory --name $name --net0 virtio,bridge=$net > /dev/null 2>&1
+qm importdisk $vmid $image local > /dev/null 2>&1
+qm set $vmid --scsihw virtio-scsi-pci --scsi0 $disk:$vmid/vm-$vmid-disk-0.raw > /dev/null 2>&1
+qm set $vmid --ide2 local:cloudinit > /dev/null 2>&1
+qm set $vmid --boot c --bootdisk scsi0 > /dev/null 2>&1
+qm set $vmid --serial0 socket --vga serial0 > /dev/null 2>&1
+qm template $vmid > /dev/null 2>&1
+
+##Check command
+
+if [ $? -eq 0 ]; then
+   echo "Template $name created successfully"
+else
+   echo "Failed to create $name template (Please check -help command)"
+fi
