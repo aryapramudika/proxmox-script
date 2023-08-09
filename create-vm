@@ -8,4 +8,4 @@ name=$3
 qm clone $temid $vmid --name $name --full > /dev/null 2>&1
 
 ##Set Nested VM
-qm set $vmid --cpu host
+qm set $vmid --cpu host > /dev/null 2>&1
