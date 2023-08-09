@@ -1,0 +1,11 @@
+#!/bin/bash
+## This script is create VM by cloning template (output of create-template script)
+
+temid=$1
+vmid=$2
+name=$3
+
+qm clone $temid $vmid --name $name --full > /dev/null 2>&1
+
+##Set Nested VM
+qm set $vmid --cpu host
