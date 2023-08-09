@@ -25,8 +25,18 @@ create-template vmid name cpu memory net disk image-file
 
 After that run script *create-vm* 
 
+*create-vm template-vm-id target-vm-id vm-name*
+
+For example:
+
 ```
 create-vm 101 1001 vm-ubuntu
+```
+
+Script delete-vm (easy delete by name)
+
+```
+delete-vm vmname
 ```
 
 For using cloud-init in Proxmox, you can read here:
