@@ -8,4 +8,5 @@ name=$1
 vmid=$(qm list | grep "$name" | awk '{print $1}')
 
 ## Delete VM
+qm stop ${vmid}
 qm destroy ${vmid}
