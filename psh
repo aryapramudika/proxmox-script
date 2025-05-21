@@ -1,0 +1,104 @@
+#!/bin/bash
+## Arya Pramudika 2025-05-21
+
+helper (){
+    if [ $# -eq 0 ]; then
+    echo "Usage: $0 <createvm/createtemplate/deletevm>"
+    fi
+}
+create_vm() {
+    local temid=$1
+    local vmid=$2
+    local name=$3
+    local cpu=$4
+    local mem_gb=$5
+    local mem=$((mem_gb * 1024))
+    local disk=$6
+
+    #Check parameters
+    if [ $# -lt 6 ]; then
+        echo "Usage: $0 createvm <template-id> <vmid> <name> <cpu> <memory> <disk>"
+        echo "Example: $0 createvm 901 101 debian-vm 4 4 30G"
+        exit 1
+    else
+        #Clone template
+        qm clone $temid $vmid --name $name --full > /dev/null 2>&1
+
+        # Set CPU Type
+        qm set $vmid --cpu host > /dev/null 2>&1
+
+        # Set CPU/Memory/Disk
+        qm set $vmid --cores=$cpu > /dev/null 2>&1
+        qm set $vmid --memory=$mem > /dev/null 2>&1
+        qm resize $vmid virtio0 $disk > /dev/null 2>&1
+    fi
+}
+create_template(){
+    local vmid=$1
+    local name=$2
+    local cpu=$3
+    local mem_gb=$4
+    local memory=$((mem_gb * 1024))
+    local net=$5
+    local disk=$6
+    local image=$7
+
+    if [ $# -lt 7 ]; then
+        echo "Usage: $0 createtemplate <vmid> <name> <cpu> <memory> <net> <disk> <image-file>"
+        echo "Example: $0 createtemplate 1001 template-ubuntu-20 2 4096 vmbr0 local-lvm focal-ubuntu.img"
+        exit 1
+    else
+        echo "Creating $name template..."
+        qm create $vmid --cores $cpu --memory $memory --name $name --net0 virtio,bridge=$net > /dev/null 2>&1
+        qm set $vmid --virtio0 $disk:0,format=qcow2,import-from=$image > /dev/null 2>&1
+        qm set $vmid --boot c --bootdisk virtio0 > /dev/null 2>&1
+        qm set $vmid --ide2 local:cloudinit > /dev/null 2>&1
+        qm set $vmid --serial0 socket --vga serial0 > /dev/null 2>&1
+        qm set $vmid --ipconfig0 ip=dhcp > /dev/null 2>&1
+        qm template $vmid > /dev/null 2>&1
+    fi
+}
+
+delete_vm(){
+    # Delete VM Proxmox by name
+    local name=$1
+    
+    # Delete VM
+    if [ $# -lt 1 ]; then
+        echo "Usage: $0 deletevm <name>"
+        echo "Example: $0 deletevm debian-vm"
+        exit 1
+    fi
+
+    local vmid=$(qm list | grep "$name" | awk '{print $1}')
+    if [ -z "$vmid" ]; then
+        echo "VM with name $name not found."
+        exit 1
+    else
+        qm stop ${vmid}
+        qm destroy ${vmid}
+    fi
+}
+#Main script
+if [ $#  -eq 0 ]; then
+    helper
+    exit 1
+fi
+case "$1" in
+    createvm)
+        shift
+        create_vm "$@"
+        ;;
+    createtemplate)
+        shift
+        create_template "$@"
+        ;;
+    deletevm)
+        shift
+        delete_vm "$@"
+        ;;
+    *)
+        helper
+        exit 1
+        ;;
+esac
